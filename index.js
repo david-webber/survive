@@ -5,6 +5,8 @@ var settings = {
 	width: window.innerWidth,
 	height: window.innerHeight,
 	enemies: 6,
+	enemySpeed: 200,
+	enemyColour: 0xff0000,
 }
 
 var config = {
@@ -51,30 +53,21 @@ function create ()
 				'22222222222222',
 		];
 
-		var pixelSize = 2;
+		var pixelSize = 1;
 		this.textures.generate('square', { data: square, pixelWidth: pixelSize, pixelHeight: pixelSize });
 
 		this.player = this.physics.add.image(config.width / 2, config.height / 2, 'square');
 		this.player.setImmovable(true);
 
-	  this.enemies = this.physics.add.group({
-			key: 'key',
-			frame: [0, 1, 2, 3, 4],
-			setXY:
-				{
-					x: 100,
-					y: 100,
-					stepX: 64,
-					stepY: 64
-				}
+	  this.enemies = this.physics.add.group();
+		for(var i = 0; i < settings.enemies; i++){
+			createEnemy(this);
+		}
+
+		this.physics.add.collider(this.player, this.enemies, (p,e) => {
+			this.enemies.remove(e, true);
+			createEnemy(this);
 		});
-
-
-
-	this.physics.add.collider(this.player, this.enemies, (p,e) => {
-		this.enemies.remove(e, true);
-		createEnemy(this);
-	});
 
 
 	this.enemies.children.iterate(enemy => {
@@ -112,11 +105,12 @@ function createEnemy(game){
 		var y = (Math.random() < 0.5)?topY:bottomY;
 		var x = (Math.random() < 0.5)?leftX:rightX;
 
-		var newenemy = game.enemies.create(x,y,'key',0);
+		var newenemy = game.enemies.create(x,y,'square',0);
+		newenemy.setTint(settings.enemyColour);
 		newenemy.setInteractive().on('pointerdown', function(pointer, localX, localY, event){
 			game.enemies.remove(newenemy, true);
 			createEnemy(game);
 		});
-		game.physics.moveToObject(newenemy, game.player, 100);
+		game.physics.moveToObject(newenemy, game.player, settings.enemySpeed);
 	}
 }
