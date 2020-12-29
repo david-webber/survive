@@ -5,17 +5,21 @@ var settings = {
 	width: window.innerWidth,
 	height: window.innerHeight,
 	enemies: 6,
-	enemySpeed: 200,
+	enemySpeed: 150,
 	enemyColour: 0xff0000,
+	player: {
+		lives: 3,
+	},
 }
 
 var config = {
 	type: Phaser.AUTO,
-	width: settings.width - 100,
-	height: settings.height - 100,
+	width: settings.width,
+	height: settings.height,
 	physics: {
 			default: 'arcade',
 			arcade: {
+				debug: true,
 			}
 	},
 	scene: {
@@ -53,7 +57,7 @@ function create ()
 				'22222222222222',
 		];
 
-		var pixelSize = 1;
+		var pixelSize = 3;
 		this.textures.generate('square', { data: square, pixelWidth: pixelSize, pixelHeight: pixelSize });
 
 		this.player = this.physics.add.image(config.width / 2, config.height / 2, 'square');
@@ -65,13 +69,14 @@ function create ()
 		}
 
 		this.physics.add.collider(this.player, this.enemies, (p,e) => {
-			this.enemies.remove(e, true);
+			settings.player.lives--;
+			this.enemies.remove(e, true,true);
 			createEnemy(this);
 		});
 
 
 	this.enemies.children.iterate(enemy => {
-		this.physics.moveToObject(enemy, this.player, 200);
+		this.physics.moveToObject(enemy, this.player, settings.enemySpeed);
 	});
 
 		// this.physics.moveToObject(enemies, player, 200);
@@ -83,6 +88,10 @@ function create ()
 
 
 function update(){
+	if(settings.player.lives <= 0){
+		this.enemies.destroy(true);
+		this.player.destroy()
+	}
 	// if(this.enemies.countActive() <= 1){
 	// 	this.enemies.getFirst
 	// }
