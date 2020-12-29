@@ -4,9 +4,11 @@ import Phaser from "phaser"
 var settings = {
 	width: window.innerWidth,
 	height: window.innerHeight,
-	enemies: 6,
-	enemySpeed: 150,
-	enemyColour: 0xff0000,
+	enemies: {
+		total: 6,
+		speed: 150,
+		colour: 0xff0000
+	},
 	player: {
 		lives: 3,
 	},
@@ -64,7 +66,7 @@ function create ()
 		this.player.setImmovable(true);
 
 	  this.enemies = this.physics.add.group();
-		for(var i = 0; i < settings.enemies; i++){
+		for(var i = 0; i < settings.enemies.total; i++){
 			createEnemy(this);
 		}
 
@@ -75,11 +77,10 @@ function create ()
 		});
 
 
-	this.enemies.children.iterate(enemy => {
-		this.physics.moveToObject(enemy, this.player, settings.enemySpeed);
-	});
+		this.enemies.children.iterate(enemy => {
+			this.physics.moveToObject(enemy, this.player, settings.enemies.speed);
+		});
 
-		// this.physics.moveToObject(enemies, player, 200);
 
 		this.pointer = this.input.activePointer;
 
@@ -92,20 +93,10 @@ function update(){
 		this.enemies.destroy(true);
 		this.player.destroy()
 	}
-	// if(this.enemies.countActive() <= 1){
-	// 	this.enemies.getFirst
-	// }
-	// if (this.pointer.isDown) {
-	// 	this.player.setScale(2);
-	// }else{
-	// 	this.player.setScale(1);
-	// }
-
-
 }
 
 function createEnemy(game){
-	if(game.enemies.countActive(true) < settings.enemies){
+	if(game.enemies.countActive(true) < settings.enemies.total){
 		var topY = Phaser.Math.Between(0, -(config.height / 2));
 		var bottomY = Phaser.Math.Between(config.height, config.height  * 1.5);
 		var leftX = Phaser.Math.Between(0, -(config.width / 2));
@@ -115,11 +106,11 @@ function createEnemy(game){
 		var x = (Math.random() < 0.5)?leftX:rightX;
 
 		var newenemy = game.enemies.create(x,y,'square',0);
-		newenemy.setTint(settings.enemyColour);
+		newenemy.setTint(settings.enemies.colour);
 		newenemy.setInteractive().on('pointerdown', function(pointer, localX, localY, event){
-			game.enemies.remove(newenemy, true);
+			game.enemies.remove(newenemy, true, true);
 			createEnemy(game);
 		});
-		game.physics.moveToObject(newenemy, game.player, settings.enemySpeed);
+		game.physics.moveToObject(newenemy, game.player, settings.enemies.speed);
 	}
 }
